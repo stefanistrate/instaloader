@@ -511,6 +511,10 @@ class Instaloader:
         filename = os.path.join(dirname, self.format_filename(post, target=target))
         os.makedirs(os.path.dirname(filename), exist_ok=True)
 
+        # Skip if post already downloaded.
+        if os.path.exists(filename + '.json') or os.path.exists(filename + '.json.xz'):
+            return True
+
         # Download the image(s) / video thumbnail and videos within sidecars if desired
         downloaded = True
         if post.typename == 'GraphSidecar':
