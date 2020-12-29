@@ -115,6 +115,8 @@ class NodeIterator(Iterator[T]):
         return self
 
     def __next__(self) -> T:
+        if self._total_index >= 100:
+            raise StopIteration()
         if self._page_index < len(self._data['edges']):
             node = self._data['edges'][self._page_index]['node']
             page_index, total_index = self._page_index, self._total_index
