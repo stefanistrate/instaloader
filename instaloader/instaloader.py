@@ -513,6 +513,7 @@ class Instaloader:
 
         # Skip if post already downloaded.
         if os.path.exists(filename + '.json') or os.path.exists(filename + '.json.xz'):
+            self.context.log('skipped', flush=True)
             return True
 
         # Download the image(s) / video thumbnail and videos within sidecars if desired
