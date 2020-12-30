@@ -314,6 +314,10 @@ class Instaloader:
             with open(filename, 'w') as file:
                 file.write(json.dumps(list(filter(lambda t: int(t['id']) not in answer_ids, comments)), indent=4))
             self.context.log('comments', end=' ', flush=True)
+        else:
+            with open(filename, 'w') as file:
+                file.write(json.dumps({}))
+            self.context.log('no_comments', end=' ', flush=True)
 
     def save_caption(self, filename: str, mtime: datetime, caption: str) -> None:
         """Updates picture caption / Post metadata info"""
@@ -511,11 +515,6 @@ class Instaloader:
         filename = os.path.join(dirname, self.format_filename(post, target=target))
         os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-        # Skip if post already downloaded.
-        if os.path.exists(filename + '.json') or os.path.exists(filename + '.json.xz'):
-            self.context.log('skipped', flush=True)
-            return True
-
         # Download the image(s) / video thumbnail and videos within sidecars if desired
         downloaded = True
         if post.typename == 'GraphSidecar':
@@ -556,11 +555,19 @@ class Instaloader:
 
         # Update comments if desired
         if self.download_comments:
-            self.update_comments(filename=filename, post=post)
+            # Skip if already downloaded.
+            if os.path.exists(filename + '_comments.json') or os.path.exists(filename + '_comments.json.xz'):
+                self.context.log('skipped_comments', end=' ', flush=True)
+            else:
+                self.update_comments(filename=filename, post=post)
 
         # Save metadata as JSON if desired.
         if self.save_metadata:
-            self.save_metadata_json(filename, post)
+            # Skip if already downloaded.
+            if os.path.exists(filename + '.json') or os.path.exists(filename + '.json.xz'):
+                self.context.log('skipped_json', end=' ', flush=True)
+            else:
+                self.save_metadata_json(filename, post)
 
         self.context.log()
         return downloaded
